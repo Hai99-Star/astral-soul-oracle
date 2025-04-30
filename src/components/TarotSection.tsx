@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Star } from 'lucide-react';
+import { generateTarotReading } from '@/utils/geminiApi';
 
 const tarotCards = [
   {
@@ -9,63 +11,63 @@ const tarotCards = [
     name: "The Fool",
     nameVi: "Kẻ Khờ",
     image: "https://www.trustedtarot.com/img/cards/the-fool.png",
-    meaning: "Sự khởi đầu mới, tinh thần phiêu lưu, tự do và không lo lắng về tương lai. Bạn đang đứng trước cơ hội mới và nên tiếp cận nó với tâm trí cởi mở.",
+    meaning: "Sự khởi đầu mới, tinh thần phiêu lưu, tự do và không lo lắng về tương lai.",
   },
   {
     id: 2,
     name: "The Magician",
     nameVi: "Nhà Ảo Thuật",
     image: "https://www.trustedtarot.com/img/cards/the-magician.png",
-    meaning: "Sức mạnh ý chí, sự sáng tạo và khả năng biến ước mơ thành hiện thực. Bạn có tất cả công cụ cần thiết để thành công trong dự định của mình.",
+    meaning: "Sức mạnh ý chí, sự sáng tạo và khả năng biến ước mơ thành hiện thực.",
   },
   {
     id: 3,
     name: "The High Priestess",
     nameVi: "Nữ Giáo Sĩ",
     image: "https://www.trustedtarot.com/img/cards/the-high-priestess.png",
-    meaning: "Trực giác, sự thông thái nội tâm và tiềm thức. Hãy lắng nghe tiếng nói bên trong và tin tưởng vào trực giác của bạn trong thời gian này.",
+    meaning: "Trực giác, sự thông thái nội tâm và tiềm thức.",
   },
   {
     id: 4,
     name: "The Empress",
     nameVi: "Hoàng Hậu",
     image: "https://www.trustedtarot.com/img/cards/the-empress.png",
-    meaning: "Sự phong phú, sáng tạo và nuôi dưỡng. Đây là thời điểm để chăm sóc bản thân và những người xung quanh, cũng như để các ý tưởng của bạn phát triển.",
+    meaning: "Sự phong phú, sáng tạo và nuôi dưỡng.",
   },
   {
     id: 5,
     name: "The Emperor",
     nameVi: "Hoàng Đế",
     image: "https://www.trustedtarot.com/img/cards/the-emperor.png",
-    meaning: "Quyền lực, cấu trúc và sự ổn định. Bạn cần thiết lập trật tự và kỷ luật trong cuộc sống hoặc dự án hiện tại của mình.",
+    meaning: "Quyền lực, cấu trúc và sự ổn định.",
   },
   {
     id: 6,
     name: "The Lovers",
     nameVi: "Cặp Đôi Yêu Nhau",
     image: "https://www.trustedtarot.com/img/cards/the-lovers.png",
-    meaning: "Tình yêu, mối quan hệ hòa hợp và sự lựa chọn. Bạn có thể đang đối mặt với một quyết định quan trọng liên quan đến trái tim mình.",
+    meaning: "Tình yêu, mối quan hệ hòa hợp và sự lựa chọn.",
   },
   {
     id: 7,
     name: "The Chariot",
     nameVi: "Cỗ Xe",
     image: "https://www.trustedtarot.com/img/cards/the-chariot.png",
-    meaning: "Quyết tâm, ý chí mạnh mẽ và chiến thắng. Với sự kiên trì và tập trung, bạn sẽ vượt qua mọi thử thách hiện tại.",
+    meaning: "Quyết tâm, ý chí mạnh mẽ và chiến thắng.",
   },
   {
     id: 8,
     name: "Strength",
     nameVi: "Sức Mạnh",
     image: "https://www.trustedtarot.com/img/cards/strength.png",
-    meaning: "Lòng can đảm, kiên nhẫn và sức mạnh nội tâm. Đây là lúc để thể hiện sự kiên cường và tự tin vào khả năng của bản thân.",
+    meaning: "Lòng can đảm, kiên nhẫn và sức mạnh nội tâm.",
   },
   {
     id: 9,
     name: "The Hermit",
     nameVi: "Ẩn Sĩ",
     image: "https://www.trustedtarot.com/img/cards/the-hermit.png",
-    meaning: "Sự tự vấn, chiêm nghiệm và tìm kiếm chân lý. Bạn cần thời gian một mình để suy ngẫm và khám phá mục đích sâu xa hơn.",
+    meaning: "Sự tự vấn, chiêm nghiệm và tìm kiếm chân lý.",
   },
 ];
 
@@ -76,6 +78,8 @@ const TarotSection = () => {
   const [revealedCards, setRevealedCards] = useState<number[]>([]);
   const [shuffling, setShuffling] = useState(false);
   const [readingComplete, setReadingComplete] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [tarotReading, setTarotReading] = useState('');
 
   const handleQuestionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuestion(e.target.value);
@@ -117,16 +121,42 @@ const TarotSection = () => {
       
       // Check if all cards are revealed
       if (revealedCards.length + 1 === selectedCards.length) {
-        setReadingComplete(true);
-        
-        // Scroll to reading interpretation
-        setTimeout(() => {
-          const resultsElement = document.getElementById('tarot-interpretation');
-          if (resultsElement) {
-            resultsElement.scrollIntoView({ behavior: 'smooth' });
-          }
-        }, 500);
+        generateReading();
       }
+    }
+  };
+  
+  const generateReading = async () => {
+    setLoading(true);
+    
+    try {
+      // Get the names of the selected cards
+      const cardNames = selectedCards.map(cardIndex => {
+        const card = tarotCards[cardIndex];
+        return `${card.name} (${card.nameVi})`;
+      });
+      
+      const reading = await generateTarotReading(question, cardNames);
+      
+      setTarotReading(reading);
+      setReadingComplete(true);
+      
+      // Scroll to reading interpretation
+      setTimeout(() => {
+        const resultsElement = document.getElementById('tarot-interpretation');
+        if (resultsElement) {
+          resultsElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 500);
+    } catch (error) {
+      console.error('Error generating tarot reading:', error);
+      toast({
+        title: "Không thể tạo kết quả",
+        description: "Đã xảy ra lỗi khi tạo bài tarot. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -135,6 +165,68 @@ const TarotSection = () => {
     setRevealedCards([]);
     setReadingComplete(false);
     setQuestion('');
+    setTarotReading('');
+  };
+  
+  // Function to render the reading in a formatted way
+  const renderFormattedReading = () => {
+    if (!tarotReading) return null;
+    
+    // Split the text into paragraphs
+    const paragraphs = tarotReading.split('\n\n').filter(p => p.trim());
+    
+    // Try to organize paragraphs into card interpretation and conclusion
+    const cardInterpretations = paragraphs.filter(p => 
+      selectedCards.some(idx => {
+        const card = tarotCards[idx];
+        return p.includes(card.name) || p.includes(card.nameVi);
+      })
+    );
+    
+    const conclusions = paragraphs.filter(p => 
+      p.toLowerCase().includes('kết luận') ||
+      p.toLowerCase().includes('tổng quan') ||
+      p.toLowerCase().includes('tổng kết') ||
+      (p.includes('.') && !cardInterpretations.includes(p))
+    );
+    
+    return (
+      <div className="space-y-6">
+        {selectedCards.map((cardIndex, index) => {
+          const card = tarotCards[cardIndex];
+          const interpretation = cardInterpretations.find(p => 
+            p.includes(card.name) || p.includes(card.nameVi)
+          ) || `Lá bài ${card.nameVi} (${card.name}) thể hiện ${card.meaning}`;
+          
+          return (
+            <div key={index} className="p-4 border border-secondary/30 rounded-lg">
+              <div className="flex items-center mb-3">
+                <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center mr-3">
+                  <span className="text-secondary font-medium">{index + 1}</span>
+                </div>
+                <h5 className="text-lg font-serif text-secondary">{card.nameVi} ({card.name})</h5>
+              </div>
+              <p>{interpretation}</p>
+            </div>
+          );
+        })}
+        
+        <div className="p-4 border border-primary/30 rounded-lg">
+          <h5 className="text-lg font-serif text-primary mb-3">Kết Luận</h5>
+          {conclusions.length > 0 ? (
+            conclusions.map((conclusion, idx) => (
+              <p key={idx} className="mb-2">{conclusion}</p>
+            ))
+          ) : (
+            <p>
+              Dựa trên sự kết hợp của các lá bài, bạn đang trong giai đoạn cần sự cân nhắc kỹ lưỡng 
+              và lắng nghe trực giác. Những thử thách hiện tại đòi hỏi sự can đảm và kiên nhẫn, 
+              nhưng với quyết tâm và sự tập trung, bạn sẽ tìm thấy con đường phù hợp nhất cho mình.
+            </p>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -233,35 +325,17 @@ const TarotSection = () => {
             })}
           </div>
           
+          {loading && (
+            <div className="text-center my-12">
+              <p className="text-secondary animate-pulse">Đang giải đoán lá bài...</p>
+            </div>
+          )}
+          
           {readingComplete && (
             <div id="tarot-interpretation" className="mt-12 mystical-card animate-fade-in-up">
               <h4 className="text-xl font-serif text-center mb-6">Diễn Giải Lá Bài</h4>
               
-              <div className="space-y-6">
-                {selectedCards.map((cardIndex, index) => {
-                  const card = tarotCards[cardIndex];
-                  return (
-                    <div key={index} className="p-4 border border-secondary/30 rounded-lg">
-                      <div className="flex items-center mb-3">
-                        <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center mr-3">
-                          <span className="text-secondary font-medium">{index + 1}</span>
-                        </div>
-                        <h5 className="text-lg font-serif text-secondary">{card.nameVi} ({card.name})</h5>
-                      </div>
-                      <p>{card.meaning}</p>
-                    </div>
-                  );
-                })}
-                
-                <div className="p-4 border border-primary/30 rounded-lg">
-                  <h5 className="text-lg font-serif text-primary mb-3">Kết Luận</h5>
-                  <p>
-                    Dựa trên sự kết hợp của các lá bài, bạn đang trong giai đoạn cần sự cân nhắc kỹ lưỡng 
-                    và lắng nghe trực giác. Những thử thách hiện tại đòi hỏi sự can đảm và kiên nhẫn, 
-                    nhưng với quyết tâm và sự tập trung, bạn sẽ tìm thấy con đường phù hợp nhất cho mình.
-                  </p>
-                </div>
-              </div>
+              {renderFormattedReading()}
               
               <div className="text-center mt-8">
                 <Button 

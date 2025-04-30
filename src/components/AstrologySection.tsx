@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { generateAstrologyReading } from '@/utils/geminiApi';
 
 type AstrologyFormData = {
   fullName: string;
@@ -19,13 +20,15 @@ const AstrologySection = () => {
     birthPlace: '',
   });
   const [showResult, setShowResult] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [astrologyReading, setAstrologyReading] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fullName || !formData.birthDate) {
       toast({
@@ -36,19 +39,91 @@ const AstrologySection = () => {
       return;
     }
     
-    setShowResult(true);
+    setLoading(true);
     
-    // Scroll to results after a brief delay
-    setTimeout(() => {
-      const resultsElement = document.getElementById('astrology-results');
-      if (resultsElement) {
-        resultsElement.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
+    try {
+      const reading = await generateAstrologyReading(
+        formData.fullName,
+        formData.birthDate,
+        formData.birthTime,
+        formData.birthPlace
+      );
+      
+      setAstrologyReading(reading);
+      setShowResult(true);
+      
+      // Scroll to results after a brief delay
+      setTimeout(() => {
+        const resultsElement = document.getElementById('astrology-results');
+        if (resultsElement) {
+          resultsElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } catch (error) {
+      console.error('Error generating astrology reading:', error);
+      toast({
+        title: "Không thể tạo kết quả",
+        description: "Đã xảy ra lỗi khi tạo lá số tử vi. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
     setShowResult(false);
+    setAstrologyReading('');
+  };
+
+  // Function to render the reading in a formatted way
+  const renderFormattedReading = () => {
+    if (!astrologyReading) return null;
+    
+    // Split the text into paragraphs
+    const paragraphs = astrologyReading.split('\n\n').filter(p => p.trim());
+    
+    return (
+      <div className="space-y-6">
+        {paragraphs.map((paragraph, index) => {
+          if (paragraph.includes('Cung mệnh') || paragraph.includes('CUNG MỆNH')) {
+            return (
+              <div key={index} className="p-6 border border-purple-800/30 rounded-lg bg-card/50">
+                <h5 className="text-lg font-serif text-primary mb-3">Cung Mệnh</h5>
+                <p>{paragraph}</p>
+              </div>
+            );
+          } else if (paragraph.includes('Cung thân') || paragraph.includes('CUNG THÂN')) {
+            return (
+              <div key={index} className="p-6 border border-purple-800/30 rounded-lg bg-card/50">
+                <h5 className="text-lg font-serif text-primary mb-3">Cung Thân</h5>
+                <p>{paragraph}</p>
+              </div>
+            );
+          } else if (paragraph.includes('sao chính') || paragraph.includes('SAO CHÍNH')) {
+            return (
+              <div key={index} className="p-6 border border-purple-800/30 rounded-lg bg-card/50">
+                <h5 className="text-lg font-serif text-primary mb-3">Các Sao Chính</h5>
+                <p>{paragraph}</p>
+              </div>
+            );
+          } else if (paragraph.includes('Vận mệnh') || paragraph.includes('VẬN MỆNH')) {
+            return (
+              <div key={index} className="p-6 border border-purple-800/30 rounded-lg bg-card/50">
+                <h5 className="text-lg font-serif text-primary mb-3">Vận Mệnh Tổng Quan</h5>
+                <p>{paragraph}</p>
+              </div>
+            );
+          } else {
+            return (
+              <div key={index} className="p-6 border border-purple-800/30 rounded-lg bg-card/50">
+                <p>{paragraph}</p>
+              </div>
+            );
+          }
+        })}
+      </div>
+    );
   };
 
   return (
@@ -75,6 +150,7 @@ const AstrologySection = () => {
               value={formData.fullName}
               onChange={handleChange}
               required
+              disabled={loading}
             />
           </div>
           
@@ -90,6 +166,7 @@ const AstrologySection = () => {
               value={formData.birthDate}
               onChange={handleChange}
               required
+              disabled={loading}
             />
           </div>
           
@@ -104,6 +181,7 @@ const AstrologySection = () => {
               className="mystical-input"
               value={formData.birthTime}
               onChange={handleChange}
+              disabled={loading}
             />
           </div>
           
@@ -119,6 +197,7 @@ const AstrologySection = () => {
               placeholder="Nhập địa điểm nơi bạn sinh ra"
               value={formData.birthPlace}
               onChange={handleChange}
+              disabled={loading}
             />
           </div>
           
@@ -126,8 +205,9 @@ const AstrologySection = () => {
             <Button 
               type="submit"
               className="mystical-button"
+              disabled={loading}
             >
-              Xem Kết Quả Tử Vi
+              {loading ? "Đang Xử Lý..." : "Xem Kết Quả Tử Vi"}
             </Button>
           </div>
         </form>
@@ -143,47 +223,7 @@ const AstrologySection = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-6 border border-purple-800/30 rounded-lg bg-card/50">
-              <h5 className="text-lg font-serif text-primary mb-3">Cung Mệnh</h5>
-              <p>
-                Cung mệnh của bạn là <span className="text-accent">Thiên Bình</span>. Bạn có tính cách cân bằng, 
-                khéo léo trong giao tiếp và có khả năng nhìn nhận mọi vấn đề từ nhiều góc độ khác nhau.
-              </p>
-            </div>
-            
-            <div className="p-6 border border-purple-800/30 rounded-lg bg-card/50">
-              <h5 className="text-lg font-serif text-primary mb-3">Cung Thân</h5>
-              <p>
-                Cung thân của bạn nằm ở <span className="text-accent">Bạch Dương</span>, thể hiện năng lượng mạnh mẽ, 
-                quyết đoán và khả năng tiên phong trong nhiều tình huống.
-              </p>
-            </div>
-            
-            <div className="p-6 border border-purple-800/30 rounded-lg bg-card/50">
-              <h5 className="text-lg font-serif text-primary mb-3">Các Sao Chính</h5>
-              <ul className="space-y-2">
-                <li>
-                  <span className="text-accent">Tử Vi:</span> Ở vị trí tốt, mang lại tài năng lãnh đạo và khả năng tổ chức
-                </li>
-                <li>
-                  <span className="text-accent">Thiên Phủ:</span> Mang lại sự ổn định tài chính và khả năng tích lũy
-                </li>
-                <li>
-                  <span className="text-accent">Thái Dương:</span> Giúp bạn tỏa sáng, tạo uy tín trong sự nghiệp
-                </li>
-              </ul>
-            </div>
-            
-            <div className="p-6 border border-purple-800/30 rounded-lg bg-card/50">
-              <h5 className="text-lg font-serif text-primary mb-3">Vận Mệnh Tổng Quan</h5>
-              <p>
-                Với cung mệnh và các sao chiếu mạng, đường đời của bạn sẽ có nhiều cơ hội phát triển về mặt sự nghiệp, 
-                đặc biệt trong các lĩnh vực đòi hỏi khả năng giao tiếp và tư duy phân tích. 
-                Giai đoạn 30-35 tuổi là thời kỳ vàng cho sự nghiệp của bạn.
-              </p>
-            </div>
-          </div>
+          {renderFormattedReading()}
           
           <div className="text-center mt-8">
             <Button 

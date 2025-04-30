@@ -2,14 +2,15 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
+import { generateNumerologyReading } from '@/utils/geminiApi';
 
 type NumerologyFormData = {
   fullName: string;
   birthDate: string;
 };
 
+// Simple calculation for display purposes while waiting for API response
 const calculateLifePathNumber = (date: string): number => {
-  // Simple calculation for demo purposes
   const dateObj = new Date(date);
   const day = dateObj.getDate();
   const month = dateObj.getMonth() + 1;
@@ -38,14 +39,16 @@ const NumerologySection = () => {
     birthDate: '',
   });
   const [showResult, setShowResult] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [lifePathNumber, setLifePathNumber] = useState(0);
+  const [numerologyReading, setNumerologyReading] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fullName || !formData.birthDate) {
       toast({
@@ -56,37 +59,125 @@ const NumerologySection = () => {
       return;
     }
     
+    setLoading(true);
     const number = calculateLifePathNumber(formData.birthDate);
     setLifePathNumber(number);
-    setShowResult(true);
     
-    // Scroll to results after a brief delay
-    setTimeout(() => {
-      const resultsElement = document.getElementById('numerology-results');
-      if (resultsElement) {
-        resultsElement.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 100);
+    try {
+      const reading = await generateNumerologyReading(
+        formData.fullName,
+        formData.birthDate
+      );
+      
+      setNumerologyReading(reading);
+      setShowResult(true);
+      
+      // Scroll to results after a brief delay
+      setTimeout(() => {
+        const resultsElement = document.getElementById('numerology-results');
+        if (resultsElement) {
+          resultsElement.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    } catch (error) {
+      console.error('Error generating numerology reading:', error);
+      toast({
+        title: "Không thể tạo kết quả",
+        description: "Đã xảy ra lỗi khi tạo thần số học. Vui lòng thử lại sau.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
     setShowResult(false);
+    setNumerologyReading('');
   };
 
-  const getLifePathDescription = (num: number): string => {
-    const descriptions: {[key: number]: string} = {
-      1: "Bạn là người có tính cách độc lập, tự tin và có khả năng lãnh đạo. Bạn thường tiên phong trong các ý tưởng mới và có khả năng thuyết phục cao.",
-      2: "Bạn rất nhạy cảm, trực giác và có khả năng hòa giải. Bạn làm việc tốt trong các môi trường đòi hỏi sự hợp tác và khả năng lắng nghe.",
-      3: "Bạn là người sáng tạo, giàu trí tưởng tượng và có khả năng giao tiếp tốt. Bạn thường thu hút mọi người bằng sự nhiệt tình và lạc quan.",
-      4: "Bạn là người thực tế, đáng tin cậy và có tính tổ chức cao. Bạn đặt nền móng vững chắc cho mọi dự án và luôn hoàn thành cam kết.",
-      5: "Bạn yêu tự do, thích khám phá và thay đổi. Bạn thích trải nghiệm đa dạng và có khả năng thích nghi cao với môi trường mới.",
-      6: "Bạn là người có trách nhiệm, giàu lòng trắc ẩn và luôn quan tâm đến người khác. Bạn có khả năng chăm sóc và nuôi dưỡng mọi người xung quanh.",
-      7: "Bạn có tư duy phân tích sâu sắc và trực giác mạnh mẽ. Bạn thường đặt câu hỏi và tìm kiếm ý nghĩa sâu xa của mọi sự việc.",
-      8: "Bạn có tham vọng, tính kỷ luật cao và khả năng quản lý tốt. Bạn có tiềm năng đạt được thành công và sự thịnh vượng trong sự nghiệp.",
-      9: "Bạn có lòng nhân ái, tinh thần phục vụ và tầm nhìn rộng lớn. Bạn thường đặt lợi ích của cộng đồng lên trên lợi ích cá nhân."
-    };
+  // Function to render the reading in a formatted way
+  const renderFormattedReading = () => {
+    if (!numerologyReading) return null;
     
-    return descriptions[num] || "Đường đời của bạn là con số đặc biệt, mang nhiều ý nghĩa sâu xa và cần được giải mã cụ thể hơn.";
+    // Split the text into paragraphs
+    const paragraphs = numerologyReading.split('\n\n').filter(p => p.trim());
+    
+    // Try to extract numbers for display
+    let soulNumber = 4; // Default fallback values
+    let destinyNumber = 2;
+    let personalityNumber = 6;
+    
+    // Extract potential numbers from the text (this is a simple approach)
+    paragraphs.forEach(paragraph => {
+      if (paragraph.includes('linh hồn') || paragraph.includes('LINH HỒN')) {
+        const match = paragraph.match(/\b[1-9]\b/);
+        if (match) soulNumber = parseInt(match[0]);
+      }
+      if (paragraph.includes('sứ mệnh') || paragraph.includes('SỨ MỆNH')) {
+        const match = paragraph.match(/\b[1-9]\b/);
+        if (match) destinyNumber = parseInt(match[0]);
+      }
+      if (paragraph.includes('nhân cách') || paragraph.includes('NHÂN CÁCH')) {
+        const match = paragraph.match(/\b[1-9]\b/);
+        if (match) personalityNumber = parseInt(match[0]);
+      }
+    });
+    
+    return (
+      <>
+        <div className="flex justify-center">
+          <div className="w-32 h-32 rounded-full bg-accent/20 border-2 border-accent flex items-center justify-center">
+            <span className="text-5xl font-serif text-accent">{lifePathNumber}</span>
+          </div>
+        </div>
+        
+        <div className="text-center">
+          <h4 className="font-serif text-xl mb-2">Con Số Đường Đời</h4>
+          {paragraphs.map((paragraph, index) => {
+            if (paragraph.toLowerCase().includes('đường đời') || paragraph.toLowerCase().includes('con số chủ đạo')) {
+              return <p key={index} className="max-w-2xl mx-auto">{paragraph}</p>;
+            }
+            return null;
+          })}
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          <div className="p-6 border border-accent/30 rounded-lg bg-card/50">
+            <h5 className="text-lg font-serif text-accent mb-3">Con Số Linh Hồn</h5>
+            <div className="text-4xl font-serif text-accent text-center mb-3">{soulNumber}</div>
+            {paragraphs.map((paragraph, index) => {
+              if (paragraph.toLowerCase().includes('linh hồn')) {
+                return <p key={index} className="text-sm">{paragraph}</p>;
+              }
+              return null;
+            })}
+          </div>
+          
+          <div className="p-6 border border-accent/30 rounded-lg bg-card/50">
+            <h5 className="text-lg font-serif text-accent mb-3">Con Số Sứ Mệnh</h5>
+            <div className="text-4xl font-serif text-accent text-center mb-3">{destinyNumber}</div>
+            {paragraphs.map((paragraph, index) => {
+              if (paragraph.toLowerCase().includes('sứ mệnh')) {
+                return <p key={index} className="text-sm">{paragraph}</p>;
+              }
+              return null;
+            })}
+          </div>
+          
+          <div className="p-6 border border-accent/30 rounded-lg bg-card/50">
+            <h5 className="text-lg font-serif text-accent mb-3">Con Số Nhân Cách</h5>
+            <div className="text-4xl font-serif text-accent text-center mb-3">{personalityNumber}</div>
+            {paragraphs.map((paragraph, index) => {
+              if (paragraph.toLowerCase().includes('nhân cách')) {
+                return <p key={index} className="text-sm">{paragraph}</p>;
+              }
+              return null;
+            })}
+          </div>
+        </div>
+      </>
+    );
   };
 
   return (
@@ -113,6 +204,7 @@ const NumerologySection = () => {
               value={formData.fullName}
               onChange={handleChange}
               required
+              disabled={loading}
             />
           </div>
           
@@ -128,6 +220,7 @@ const NumerologySection = () => {
               value={formData.birthDate}
               onChange={handleChange}
               required
+              disabled={loading}
             />
           </div>
           
@@ -136,8 +229,9 @@ const NumerologySection = () => {
               type="submit"
               className="mystical-button"
               style={{ background: "linear-gradient(to right, rgb(254,202,87), rgb(252,176,69))" }}
+              disabled={loading}
             >
-              Xem Kết Quả Thần Số Học
+              {loading ? "Đang Xử Lý..." : "Xem Kết Quả Thần Số Học"}
             </Button>
           </div>
         </form>
@@ -151,47 +245,7 @@ const NumerologySection = () => {
             </p>
           </div>
           
-          <div className="flex justify-center">
-            <div className="w-32 h-32 rounded-full bg-accent/20 border-2 border-accent flex items-center justify-center">
-              <span className="text-5xl font-serif text-accent">{lifePathNumber}</span>
-            </div>
-          </div>
-          
-          <div className="text-center">
-            <h4 className="font-serif text-xl mb-2">Con Số Đường Đời</h4>
-            <p className="max-w-2xl mx-auto">
-              {getLifePathDescription(lifePathNumber)}
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            <div className="p-6 border border-accent/30 rounded-lg bg-card/50">
-              <h5 className="text-lg font-serif text-accent mb-3">Con Số Linh Hồn</h5>
-              <div className="text-4xl font-serif text-accent text-center mb-3">4</div>
-              <p className="text-sm">
-                Thể hiện khát vọng và mong muốn nội tâm. Với con số 4, bạn khao khát sự ổn định, 
-                hệ thống và nền tảng vững chắc trong cuộc sống.
-              </p>
-            </div>
-            
-            <div className="p-6 border border-accent/30 rounded-lg bg-card/50">
-              <h5 className="text-lg font-serif text-accent mb-3">Con Số Sứ Mệnh</h5>
-              <div className="text-4xl font-serif text-accent text-center mb-3">2</div>
-              <p className="text-sm">
-                Đại diện cho điểm đến của bạn trong đời. Với con số 2, sứ mệnh của bạn là mang lại 
-                hòa bình, cân bằng và hợp tác cho thế giới xung quanh.
-              </p>
-            </div>
-            
-            <div className="p-6 border border-accent/30 rounded-lg bg-card/50">
-              <h5 className="text-lg font-serif text-accent mb-3">Con Số Nhân Cách</h5>
-              <div className="text-4xl font-serif text-accent text-center mb-3">6</div>
-              <p className="text-sm">
-                Phản ánh cách người khác nhìn nhận về bạn. Với con số 6, bạn được xem là người đáng 
-                tin cậy, có trách nhiệm và luôn quan tâm đến người khác.
-              </p>
-            </div>
-          </div>
+          {renderFormattedReading()}
           
           <div className="text-center mt-8">
             <Button 
