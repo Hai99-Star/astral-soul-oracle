@@ -1,0 +1,13 @@
+.shufflingContainer {
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.message {
+  margin-top: 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+} 

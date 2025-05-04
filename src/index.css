@@ -1,0 +1,465 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 30% 8%;
+    --foreground: 240 10% 95%;
+
+    --card: 240 25% 12%;
+    --card-foreground: 240 10% 95%;
+
+    --popover: 240 25% 10%;
+    --popover-foreground: 240 10% 95%;
+
+    --primary: 269 75% 60%;
+    --primary-foreground: 240 10% 95%;
+
+    --secondary: 249 45% 25%;
+    --secondary-foreground: 240 10% 95%;
+
+    --muted: 240 20% 20%;
+    --muted-foreground: 240 10% 70%;
+
+    --accent: 45 80% 60%;
+    --accent-foreground: 240 5% 10%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 240 10% 95%;
+
+    --border: 240 20% 18%;
+    --input: 240 20% 18%;
+    --ring: 240 20% 30%;
+
+    --radius: 0.5rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image: radial-gradient(circle at 90% 10%, rgba(120, 90, 200, 0.1), transparent 40%),
+                     radial-gradient(circle at 10% 90%, rgba(88, 65, 150, 0.1), transparent 40%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cormorant Garamond', serif;
+    @apply font-medium tracking-wide;
+  }
+
+  /* Custom animation classes */
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .glow-effect {
+    box-shadow: 0 0 15px rgba(155, 135, 245, 0.4);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .glow-effect:hover {
+    box-shadow: 0 0 25px rgba(155, 135, 245, 0.6);
+  }
+
+  .star-bg {
+    background-image: radial-gradient(white, rgba(255, 255, 255, 0) 2px);
+    background-size: 50px 50px;
+    opacity: 0.2;
+  }
+
+  /* Custom animation keyframes */
+  @keyframes float {
+    0% {
+      transform: translatey(0px);
+    }
+    50% {
+      transform: translatey(-10px);
+    }
+    100% {
+      transform: translatey(0px);
+    }
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer components {
+  .mystical-card {
+    @apply rounded-lg border border-purple-800/30 bg-card p-6 shadow-lg;
+    background: linear-gradient(to bottom right, rgba(54, 42, 80, 0.8), rgba(30, 25, 45, 0.8));
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  }
+  
+  .mystical-input {
+    @apply bg-muted/50 border border-muted text-foreground rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50;
+    backdrop-filter: blur(5px);
+  }
+  
+  .mystical-button {
+    @apply bg-primary text-primary-foreground hover:bg-primary/80 rounded-md px-6 py-3 font-medium transition-all duration-300 shadow-lg shadow-primary/20;
+    background: linear-gradient(to right, rgb(155, 135, 245), rgb(126, 105, 171));
+  }
+
+  .accent-text {
+    @apply text-accent font-medium;
+  }
+
+  .mystical-divider {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-purple-500/30 to-transparent my-8;
+  }
+}
+
+/* Stars animation */
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.star {
+  position: absolute;
+  background-color: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: twinkle var(--duration) ease-in-out infinite;
+  animation-delay: var(--delay);
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0; }
+  50% { opacity: var(--opacity); }
+}
+
+/* New animations for Tarot cards and readings */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(50px) scale(0.8);
+  }
+  70% {
+    transform: translateY(-10px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes sectionAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.7s ease-out forwards;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.7s ease-out forwards;
+}
+
+.card-appear-0 {
+  animation: cardAppear 0.8s ease-out 0.1s forwards;
+  opacity: 0;
+}
+
+.card-appear-1 {
+  animation: cardAppear 0.8s ease-out 0.4s forwards;
+  opacity: 0;
+}
+
+.card-appear-2 {
+  animation: cardAppear 0.8s ease-out 0.7s forwards;
+  opacity: 0;
+}
+
+.section-appear {
+  animation: sectionAppear 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+
+.animation-delay-800 {
+  animation-delay: 800ms;
+}
+
+/* Enhanced Tarot card styles */
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(138, 101, 204, 0.6), 0 4px 15px rgba(0, 0, 0, 0.4);
+  transition: box-shadow 0.5s ease;
+}
+
+.shadow-glow-sm {
+  box-shadow: 0 0 10px rgba(138, 101, 204, 0.4);
+}
+
+.hover\:shadow-glow:hover {
+  box-shadow: 0 0 25px rgba(138, 101, 204, 0.7), 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Improved Tarot Card Flip Animation */
+.card-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transform-style: preserve-3d;
+  min-width: 120px;
+  min-height: 180px;
+  cursor: pointer;
+}
+
+.card-container.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-back, .card-front {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  transition: all 0.5s ease;
+}
+
+.card-back {
+  background: linear-gradient(135deg, #2c1f4a, #1a1233);
+  border: 2px solid #8a65cc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-back:hover {
+  box-shadow: 0 0 20px rgba(138, 101, 204, 0.6), 0 0 30px rgba(138, 101, 204, 0.3);
+  border-color: #b090e4;
+  transform: translateY(-5px);
+}
+
+.card-back::after {
+  content: '';
+  position: absolute;
+  width: 80%;
+  height: 80%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  top: 10%;
+  left: 10%;
+  border-radius: 5px;
+  background-image: url("data:image/svg+xml,%3Csvg width='52' height='52' viewBox='0 0 52 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 17.83V0h17.83a3 3 0 0 1-5.66 2H5.9A5 5 0 0 1 2 5.9v6.27a3 3 0 0 1-2 5.66zm0 18.34a3 3 0 0 1 2 5.66v6.27A5 5 0 0 1 5.9 52h6.27a3 3 0 0 1 5.66 0H0V36.17zM36.17 52a3 3 0 0 1 5.66 0h6.27a5 5 0 0 1 3.9-3.9v-6.27a3 3 0 0 1 0-5.66V52H36.17zM52 36.17a3 3 0 0 1 0-5.66v-6.27a5 5 0 0 1-3.9-3.9h-6.27a3 3 0 0 1-5.66-2H52v17.83zm0-18.34a3 3 0 0 1-5.66 0h-6.27a5 5 0 0 1-3.9 3.9v6.27a3 3 0 0 1 0 5.66V0h17.83a3 3 0 0 1-2 5.66V11.9a5 5 0 0 1 3.9 3.9v6.27a3 3 0 0 1 2 5.66H36.17a3 3 0 0 1 2 5.66v6.27a5 5 0 0 1 3.9 3.9h6.27a3 3 0 0 1 5.66 0H0V36.17a3 3 0 0 1 0 5.66v6.27a5 5 0 0 1 3.9 3.9h6.27a3 3 0 0 1 5.66 0H52z' fill='rgba(255,255,255,0.1)' fill-rule='evenodd'/%3E%3C/svg%3E");
+  transition: all 0.5s ease;
+}
+
+.card-back:hover::after {
+  border-color: rgba(255, 255, 255, 0.3);
+  background-image: url("data:image/svg+xml,%3Csvg width='52' height='52' viewBox='0 0 52 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 17.83V0h17.83a3 3 0 0 1-5.66 2H5.9A5 5 0 0 1 2 5.9v6.27a3 3 0 0 1-2 5.66zm0 18.34a3 3 0 0 1 2 5.66v6.27A5 5 0 0 1 5.9 52h6.27a3 3 0 0 1 5.66 0H0V36.17zM36.17 52a3 3 0 0 1 5.66 0h6.27a5 5 0 0 1 3.9-3.9v-6.27a3 3 0 0 1 0-5.66V52H36.17zM52 36.17a3 3 0 0 1 0-5.66v-6.27a5 5 0 0 1-3.9-3.9h-6.27a3 3 0 0 1-5.66-2H52v17.83zm0-18.34a3 3 0 0 1-5.66 0h-6.27a5 5 0 0 1-3.9 3.9v6.27a3 3 0 0 1 0 5.66V0h17.83a3 3 0 0 1-2 5.66V11.9a5 5 0 0 1 3.9 3.9v6.27a3 3 0 0 1 2 5.66H36.17a3 3 0 0 1 2 5.66v6.27a5 5 0 0 1 3.9 3.9h6.27a3 3 0 0 1 5.66 0H0V36.17a3 3 0 0 1 0 5.66v6.27a5 5 0 0 1 3.9 3.9h6.27a3 3 0 0 1 5.66 0H52z' fill='rgba(255,255,255,0.15)' fill-rule='evenodd'/%3E%3C/svg%3E");
+}
+
+.card-back::before {
+  content: '✦';
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.5s ease;
+}
+
+.card-back:hover::before {
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  transform: rotate(180deg) scale(1.2);
+}
+
+.card-front {
+  transform: rotateY(180deg);
+  background: linear-gradient(to bottom, #ffffff, #f8f8ff);
+  overflow: hidden;
+  border: 2px solid #8a65cc;
+  transition: all 0.5s ease;
+}
+
+.card-front:hover {
+  box-shadow: 0 0 25px rgba(138, 101, 204, 0.7), 0 8px 25px rgba(0, 0, 0, 0.4);
+  transform: rotateY(180deg) translateY(-5px);
+}
+
+/* Perspective container for 3D effects */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Floating animation for revealed cards */
+@keyframes floatCard {
+  0% { transform: translateY(0) rotateY(180deg); }
+  50% { transform: translateY(-10px) rotateY(180deg); }
+  100% { transform: translateY(0) rotateY(180deg); }
+}
+
+.card-container.flipped {
+  animation: floatCard 6s ease-in-out infinite;
+}
+
+/* Card name styling */
+.card-title {
+  background: linear-gradient(to bottom, rgba(44, 19, 62, 0.9), rgba(44, 19, 62, 0.8));
+  padding: 10px;
+  color: white;
+  text-align: center;
+  border-top: 1px solid rgba(138, 101, 204, 0.5);
+}
+
+.card-title h5 {
+  font-weight: 600;
+  font-size: 16px;
+  margin: 0;
+  color: #c4b5fd;
+  text-shadow: 0 0 5px rgba(196, 181, 253, 0.5);
+}
+
+.card-title p {
+  font-size: 14px;
+  margin: 5px 0 0;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Shimmer effect for card elements */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.shimmer-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 2s infinite;
+}
+
+/* Tarot content styling */
+.tarot-content p {
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.tarot-content p:last-child {
+  margin-bottom: 0;
+}
+
+.tarot-content .keyword {
+  color: rgb(216, 180, 254);
+  font-weight: 600;
+  text-shadow: 0 0 8px rgba(216, 180, 254, 0.4);
+  letter-spacing: 0.02em;
+  display: inline-block;
+  padding: 0 2px;
+  border-bottom: 1px dotted rgba(216, 180, 254, 0.4);
+}
+
+/* Improved typography for tarot readings */
+#tarot-reading h3 {
+  text-shadow: 0 0 15px rgba(196, 181, 253, 0.5);
+  letter-spacing: 0.05em;
+}
+
+#tarot-reading h4 {
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 10px rgba(196, 181, 253, 0.4);
+}
+
+#tarot-reading h5 {
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 8px rgba(196, 181, 253, 0.3);
+}
+
+/* Ensure proper spacing for line breaks */
+.tarot-content p br {
+  display: block;
+  content: "";
+  margin-top: 0.8rem;
+}
+
+/* Add a subtle background to make text more readable */
+.tarot-content p {
+  position: relative;
+}
+
+.tarot-content p::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to right, rgba(91, 33, 182, 0.05), rgba(91, 33, 182, 0.02));
+  z-index: -1;
+  border-radius: 4px;
+  pointer-events: none;
+}

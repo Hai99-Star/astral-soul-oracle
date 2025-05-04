@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800">
+  <!-- Background with deep space nebula effect -->
+  <defs>
+    <radialGradient id="backgroundGradient" cx="50%" cy="50%" r="70%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#34245c" />
+      <stop offset="70%" stop-color="#1a1035" />
+      <stop offset="100%" stop-color="#0c061d" />
+    </radialGradient>
+    
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Dark background -->
+  <circle cx="400" cy="400" r="400" fill="url(#backgroundGradient)" />
+  
+  <!-- Outer cosmic wheel -->
+  <circle cx="400" cy="400" r="320" fill="none" stroke="#ffcc66" stroke-width="3" opacity="0.8" />
+  
+  <!-- Middle cosmic wheel -->
+  <circle cx="400" cy="400" r="270" fill="none" stroke="#a67cff" stroke-width="2" opacity="0.7" />
+  
+  <!-- Inner cosmic wheel -->
+  <circle cx="400" cy="400" r="220" fill="none" stroke="#ffcc66" stroke-width="3" opacity="0.9" />
+  
+  <!-- Zodiac divisions and sacred geometry -->
+  <g opacity="0.9">
+    <!-- 12 zodiac divisions -->
+    <line x1="400" y1="80" x2="400" y2="720" stroke="#a67cff" stroke-width="2" opacity="0.6" />
+    <line x1="80" y1="400" x2="720" y2="400" stroke="#a67cff" stroke-width="2" opacity="0.6" />
+    
+    <!-- Diagonal lines -->
+    <line x1="160" y1="160" x2="640" y2="640" stroke="#a67cff" stroke-width="2" opacity="0.6" />
+    <line x1="160" y1="640" x2="640" y2="160" stroke="#a67cff" stroke-width="2" opacity="0.6" />
+    
+    <!-- Sacred geometry: additional divisions -->
+    <line x1="240" y1="120" x2="560" y2="680" stroke="#ffcc66" stroke-width="1.5" opacity="0.4" />
+    <line x1="120" y1="240" x2="680" y2="560" stroke="#ffcc66" stroke-width="1.5" opacity="0.4" />
+    <line x1="120" y1="560" x2="680" y2="240" stroke="#ffcc66" stroke-width="1.5" opacity="0.4" />
+    <line x1="240" y1="680" x2="560" y2="120" stroke="#ffcc66" stroke-width="1.5" opacity="0.4" />
+  </g>
+  
+  <!-- Central star -->
+  <g filter="url(#glow)">
+    <path d="M400,220 L430,370 L580,400 L430,430 L400,580 L370,430 L220,400 L370,370 Z" 
+          fill="#ffffff" opacity="0.9" />
+  </g>
+  
+  <!-- Planetary glyphs -->
+  <g fill="#ffcc66" opacity="0.8">
+    <!-- Sun symbol -->
+    <circle cx="400" cy="400" r="30" fill="#ffcc66" opacity="0.8" />
+    <circle cx="400" cy="400" r="22" fill="#1a1035" opacity="0.9" />
+    
+    <!-- Moon symbol -->
+    <circle cx="400" cy="180" r="18" fill="#a67cff" opacity="0.8" filter="url(#glow)" />
+    
+    <!-- Mercury symbol -->
+    <circle cx="620" cy="400" r="18" fill="#a67cff" opacity="0.8" filter="url(#glow)" />
+    
+    <!-- Venus symbol -->
+    <circle cx="180" cy="400" r="18" fill="#a67cff" opacity="0.8" filter="url(#glow)" />
+    
+    <!-- Mars symbol -->
+    <circle cx="550" cy="550" r="18" fill="#a67cff" opacity="0.8" filter="url(#glow)" />
+    
+    <!-- Jupiter symbol -->
+    <circle cx="250" cy="250" r="18" fill="#a67cff" opacity="0.8" filter="url(#glow)" />
+    
+    <!-- Saturn symbol -->
+    <circle cx="550" cy="250" r="18" fill="#a67cff" opacity="0.8" filter="url(#glow)" />
+    
+    <!-- Uranus symbol -->
+    <circle cx="250" cy="550" r="18" fill="#a67cff" opacity="0.8" filter="url(#glow)" />
+  </g>
+  
+  <!-- Connected light lines -->
+  <g stroke="#ffffff" opacity="0.3">
+    <line x1="400" y1="400" x2="400" y2="180" stroke-width="1.5" />
+    <line x1="400" y1="400" x2="620" y2="400" stroke-width="1.5" />
+    <line x1="400" y1="400" x2="180" y2="400" stroke-width="1.5" />
+    <line x1="400" y1="400" x2="550" y2="550" stroke-width="1.5" />
+    <line x1="400" y1="400" x2="250" y2="250" stroke-width="1.5" />
+    <line x1="400" y1="400" x2="550" y2="250" stroke-width="1.5" />
+    <line x1="400" y1="400" x2="250" y2="550" stroke-width="1.5" />
+  </g>
+  
+  <!-- Additional ethereal glow effects -->
+  <circle cx="400" cy="400" r="320" fill="none" stroke="#ffffff" stroke-width="1" opacity="0.2" />
+  <circle cx="400" cy="400" r="330" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.1" />
+</svg> 
